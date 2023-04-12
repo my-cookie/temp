@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { axiosInstance } from "../../api/axios";
+import axios from "axios";
+import useAuth from "../../hooks/useAuth";
 
 function SelectCookie() {
   const navigate = useNavigate();
   const [cookie, setCookie] = useState([]); // 서버에서 불러오는 쿠키
   const [flavor, setFlavors] = useState(""); // 유저가 선택한 쿠키
   const user_uuid = "b22a8b3a-0f76-4859-a7d5-7238a36c0cf9";
+  const { accessToken, setAccessToken } = useAuth();
 
   async function getCookie() {
     try {
@@ -18,35 +21,48 @@ function SelectCookie() {
       console.log(error);
     }
   }
-
   useEffect(() => {
     getCookie();
   }, []);
 
-  const handleClick = (e) => {
-    console.log(e.target.id);
-    // flavors.push(e.target.id);
+  useEffect(() => {
+    console.log(flavor);
+  }, [flavor]);
+
+  const handleClickPlus = (e) => {
     if (flavor.length === 0) {
-      setFlavors(flavor + e.target.id);
+      setFlavors(flavor + `${e.target.id}`);
     } else {
       setFlavors(flavor + `,${e.target.id}`);
     }
-
-    // sessionStorage.setItem("cookie", JSON.stringify(flavors));
   };
-
-  // setFlavors(flavors.split().join(","));
+  const handleClickMinus = (e) => {
+    if (flavor.length == 1) {
+      setFlavors(flavor.replace(`${e.target.id}`, ""));
+    } else if (flavor.indexOf(e.target.id.toString()) == 0) {
+      setFlavors(flavor.replace(`${e.target.id},`, ""));
+    } else if (flavor.includes(`,${e.target.id}`)) {
+      setFlavors(flavor.replace(`,${e.target.id}`, ""));
+    } else {
+      setFlavors(flavor.replace(`${e.target.id}`, ""));
+    }
+  };
 
   const selectBtn = () => {
     const nicknameData = sessionStorage.getItem("nickname");
     const nickname = JSON.parse(nicknameData);
-    // const flavorsCookie = sessionStorage.getItem("cookie");
-    // const flavors = JSON.parse(flavorsCookie);
-    axiosInstance
+
+    axios
       .post(`api/auth/info`, { nickname, flavor, user_uuid })
-      .then((res) => {
-        console.log(res.data);
-        navigate("/mymessage");
+      .then((result) => {
+        const { status, data } = result;
+        console.log(status);
+        if (status === 200) {
+          setAccessToken(data.tokens.access);
+          navigate("/mymessage");
+        } else {
+          navigate("/");
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -66,20 +82,15 @@ function SelectCookie() {
             <CookieListBox>
               {cookie &&
                 cookie?.map((cookie, index) => {
-                  return (
+                  return flavor.includes(`${cookie.id}`) ? (
                     <li key={index} className="cookie_list">
-                      <img
-                        src={cookie.img}
-                        alt={cookie.name}
-                        className="cookie_img"
-                      />
-                      <input
-                        type="button"
-                        id={cookie.id}
-                        value={cookie.name}
-                        onClick={handleClick}
-                        className="cookie_btn"
-                      />
+                      <img style={{ backgroundColor: "orange" }} src={cookie.img} alt={cookie.name} className="cookie_img" />
+                      <input type="button" id={cookie.id} value={cookie.name} onClick={handleClickMinus} className="cookie_btn" />
+                    </li>
+                  ) : (
+                    <li key={index} className="cookie_list">
+                      <img src={cookie.img} alt={cookie.name} className="cookie_img" />
+                      <input type="button" id={cookie.id} value={cookie.name} onClick={handleClickPlus} className="cookie_btn" />
                     </li>
                   );
                 })}

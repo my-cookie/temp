@@ -17,9 +17,10 @@ function Router() {
   return (
     <Routes>
       <Route index element={<Login />} />
+
+      <Route path="/nickname" element={<Nickname />} />
+      <Route path="/select" element={<SelectCookie />} />
       <Route element={<PrivateLayout />}>
-        <Route path="/nickname" element={<Nickname />} />
-        <Route path="/select" element={<SelectCookie />} />
         <Route path="/mymessage" element={<Mymessage />} />
         <Route path="/readmessage" element={<ReadMessage />} />
         <Route path="/sendmessage" element={<SendMessage />} />

@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { axiosInstance } from "../api/axios";
+import useAxios from "../hooks/useAxios";
 
 function FriendSelectCookie() {
   const [cookie, setCookie] = useState([]);
   const [flavors, setFlavors] = useState();
+  const privateAxios = useAxios();
 
   async function getCookie() {
     try {
-      const res = await axiosInstance.get(`api/flavor/cookies`);
+      const res = await privateAxios.get(`api/flavor/cookies`);
       console.log(res.data);
       setCookie(res.data);
     } catch (error) {
@@ -31,9 +33,7 @@ function FriendSelectCookie() {
           <FriendSelectTitle>친구가 선택한</FriendSelectTitle>
           <FriendSelectTitle>쿠키맛은 뭘까?</FriendSelectTitle>
 
-          <FriendSelectTip>
-            tip. 친구의 쿠키맛을 맞혀야 보낼 수 있어!
-          </FriendSelectTip>
+          <FriendSelectTip>tip. 친구의 쿠키맛을 맞혀야 보낼 수 있어!</FriendSelectTip>
         </div>
 
         <div className="select_cookie">
@@ -43,17 +43,8 @@ function FriendSelectCookie() {
                 cookie?.map((cookie, index) => {
                   return (
                     <li key={index} className="cookie_list">
-                      <img
-                        src={cookie.img}
-                        alt={cookie.name}
-                        className="cookie_img"
-                      />
-                      <button
-                        type="button"
-                        id={cookie.id}
-                        onClick={handleClick}
-                        className="cookie_btn"
-                      >
+                      <img src={cookie.img} alt={cookie.name} className="cookie_img" />
+                      <button type="button" id={cookie.id} onClick={handleClick} className="cookie_btn">
                         {cookie.name}
                       </button>
                     </li>

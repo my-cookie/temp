@@ -2,13 +2,16 @@ import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import axios from "axios";
+import { useState } from "react";
 
 function PrivateLayout() {
   const { accessToken, setAccessToken } = useAuth();
   const navigate = useNavigate();
+  const [init, setInit] = useState(false);
 
   useEffect(() => {
-    if (!accessToken) {
+    setInit(true);
+    if (!accessToken && init) {
       console.log("access token 재발급");
       axios
         .post("api/auth/access", {})
